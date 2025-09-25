@@ -1,4 +1,4 @@
-import { IsInt, IsNotEmpty, IsOptional } from 'class-validator';
+import { IsNotEmpty, IsOptional } from 'class-validator';
 
 export class CreateRoomDto {
   @IsNotEmpty({ message: 'O nome é obrigatório' })
@@ -10,6 +10,6 @@ export class CreateRoomDto {
   @IsOptional()
   note: string;
 
-  @IsInt()
+  @IsNotEmpty({ message: 'O usuário é obrigatório' })
   user_id: number;
 }

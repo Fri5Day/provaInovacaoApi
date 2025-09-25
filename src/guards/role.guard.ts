@@ -1,26 +1,41 @@
-import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  ForbiddenException,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from 'src/decorators/role.decorators';
-import { Role } from 'src/enums/role.enum';
 
 @Injectable()
-export class RoleGuard implements CanActivate {
-  constructor(private readonly reflector: Reflector) {}
+export class RolesGuard implements CanActivate {
+  constructor(private reflector: Reflector) {}
 
-  async canActivate(context: ExecutionContext) {
-    const requeridRoles = this.reflector.getAllAndOverride<Role[]>(ROLES_KEY, [
+  canActivate(context: ExecutionContext): boolean {
+    const requiredRoles = this.reflector.getAllAndOverride<string[]>(ROLES_KEY, [
       context.getHandler(),
       context.getClass(),
     ]);
 
-    if (!requeridRoles) {
-      return true;
+    if (!requiredRoles) return true;
+
+    const request = context.switchToHttp().getRequest();
+
+    let userRole: string = '';
+
+    userRole = request.user?.role || '';
+
+    if (
+      !userRole ||
+      !requiredRoles
+        .map((r) => r.toUpperCase())
+        .includes(userRole.toUpperCase())
+    ) {
+      throw new ForbiddenException(
+        'You do not have permission to access this resource.'
+      );
     }
-    
-    const { user } = context.switchToHttp().getRequest();
 
-    const rolesFilted = requeridRoles.filter(role => role === user.role);
-
-    return rolesFilted.length > 0;
+    return true;
   }
 }

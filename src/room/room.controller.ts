@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Delete, Body, Param, Put } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Delete,
+  Body,
+  Param,
+  Put,
+} from '@nestjs/common';
 import { RoomService } from './room.service';
 import { CreateRoomDto } from './dto/room-create.dto';
 

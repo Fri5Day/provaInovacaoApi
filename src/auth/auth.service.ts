@@ -26,10 +26,7 @@ export class AuthService {
           email: user.email,
         },
         {
-          expiresIn: '1 days',
           subject: String(user.id),
-          issuer: 'login',
-          audience: 'users',
         },
       ),
     };
@@ -37,11 +34,7 @@ export class AuthService {
 
   checkToken(token: string) {
     try {
-      const data = this.jwtService.verify(token, {
-        audience: 'users',
-        issuer: 'login',
-      });
-
+      const data = this.jwtService.verify(token);
       return data;
     } catch (e) {
       throw new BadRequestException(e);
