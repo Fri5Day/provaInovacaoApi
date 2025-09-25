@@ -7,7 +7,6 @@ export class ReserveService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(data: CreateReserveDto) {
-    // Garantir que as datas sejam tratadas como UTC
     const dateInit = new Date(data.dateInit);
     const dateEnd = new Date(data.dateEnd);
     const now = new Date();
@@ -20,25 +19,21 @@ export class ReserveService {
       dateEndParsed: dateEnd.toISOString(),
     });
 
-    // Validação de datas válidas
     if (isNaN(dateInit.getTime()) || isNaN(dateEnd.getTime())) {
       throw new BadRequestException('Formato de data inválido');
     }
 
-    // 1. Validação de Tempo: fim deve ser após início
     if (dateEnd <= dateInit) {
       throw new BadRequestException(
         'A data de término deve ser posterior à data de início',
       );
     }
 
-    // 2. Reservas no Passado: permitir margem de 1 minuto para evitar problemas de timezone
     const oneMinuteAgo = new Date(now.getTime() - 60000);
     if (dateInit < oneMinuteAgo) {
       throw new BadRequestException('Não é possível criar reservas no passado');
     }
 
-    // 3. Sem Conflitos: verificar sobreposição na mesma sala
     const conflictingReserve = await this.prisma.reserve.findFirst({
       where: {
         room_id: roomId,
