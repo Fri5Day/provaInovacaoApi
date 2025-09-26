@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -34,7 +35,7 @@ export class UserService {
     }
   }
 
-  async update(id: number, data: CreateUserDto) {
+  async update(id: number, data: UpdateUserDto) {
     const existUser = await this.prisma.user.findUnique({
       where: { id },
     });
@@ -43,18 +44,31 @@ export class UserService {
       throw new BadRequestException('Usuário não encontrado');
     }
 
-    const hashedPassword = await bcrypt.hash(data.password, await bcrypt.genSalt());
+    if (data.email && data.email !== existUser.email) {
+      const emailExists = await this.prisma.user.findUnique({
+        where: { email: data.email },
+      });
+      if (emailExists) {
+        throw new BadRequestException('Email já cadastrado');
+      }
+    }
+
+    const updateData: any = {};
+    if (data.name) updateData.name = data.name;
+    if (data.email) updateData.email = data.email;
+    if (data.role) updateData.role = data.role;
+    
+    if (data.password) {
+      updateData.password = await bcrypt.hash(data.password, await bcrypt.genSalt());
+    }
 
     try {
       return await this.prisma.user.update({
         where: { id },
-        data: {
-          ...data,
-          password: hashedPassword,
-        },
+        data: updateData,
       });
     } catch (error) {
-      throw new BadRequestException('Erro ao atualizar usuário');
+      throw new BadRequestException('Erro ao atualizar usuário:', error);
     }
   }
 

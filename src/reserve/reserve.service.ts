@@ -12,13 +12,6 @@ export class ReserveService {
     const now = new Date();
     const roomId = Number(data.room_id);
 
-    console.log('Datas recebidas:', {
-      dateInit: data.dateInit,
-      dateEnd: data.dateEnd,
-      dateInitParsed: dateInit.toISOString(),
-      dateEndParsed: dateEnd.toISOString(),
-    });
-
     if (isNaN(dateInit.getTime()) || isNaN(dateEnd.getTime())) {
       throw new BadRequestException('Formato de data inválido');
     }

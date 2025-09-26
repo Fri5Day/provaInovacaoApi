@@ -5,7 +5,7 @@ export class AuthLoginDTO {
   @IsNotEmpty()
   email: string;
 
-  @MinLength(6)
+//  @MinLength(6)
   @IsNotEmpty()
   password: string;
 }
